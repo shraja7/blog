@@ -27,9 +27,9 @@ app.get("/api/blogs", (request, response) => {
   });
 });
 
+//post a  new blog to the database
 app.post("/api/blogs", (request, response) => {
   const blog = new Blog(request.body);
-
   blog.save().then((result) => {
     response.status(201).json(result);
   });
