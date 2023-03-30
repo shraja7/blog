@@ -70,6 +70,26 @@ describe("blog API", () => {
 
     expect(response.body.likes).toBe(0);
   });
+  //test for missing title and url properties
+  test("responds with 400 Bad Request if title is missing", async () => {
+    const newBlog = {
+      author: "Author without title",
+      url: "http://example.com/missing-title",
+      likes: 5,
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(400);
+  });
+
+  test("responds with 400 Bad Request if url is missing", async () => {
+    const newBlog = {
+      title: "Blog without URL",
+      author: "Author without URL",
+      likes: 5,
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(400);
+  });
 });
 
 afterAll(async () => {

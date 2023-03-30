@@ -31,9 +31,15 @@ app.get("/api/blogs", (request, response) => {
 
 app.post("/api/blogs", (request, response) => {
   const blogData = request.body;
+
+  if (!blogData.title || !blogData.url) {
+    return response.status(400).json({ error: "title or url missing" });
+  }
+
   if (blogData.likes === undefined) {
     blogData.likes = 0;
   }
+
   const blog = new Blog(blogData);
   blog.save().then((result) => {
     response.status(201).json(result);
