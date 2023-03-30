@@ -90,6 +90,31 @@ describe("blog API", () => {
 
     await api.post("/api/blogs").send(newBlog).expect(400);
   });
+
+  //test deleting a blog
+  test("a blog can be deleted", async () => {
+    const newBlog = {
+      title: "Blog to be deleted",
+      author: "Author to be deleted",
+      url: "http://example.com/to-be-deleted",
+      likes: 1,
+    };
+
+    const response = await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const blogId = response.body.id;
+
+    await api.delete(`/api/blogs/${blogId}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
+    const titles = blogsAtEnd.map((blog) => blog.title);
+    expect(titles).not.toContain("Blog to be deleted");
+  });
 });
 
 afterAll(async () => {

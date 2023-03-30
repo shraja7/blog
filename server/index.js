@@ -46,6 +46,12 @@ app.post("/api/blogs", (request, response) => {
   });
 });
 
+// delete a blog post
+app.delete("/api/blogs/:id", async (request, response) => {
+  const id = request.params.id;
+  await Blog.findByIdAndDelete(id);
+  response.status(204).end();
+});
 const PORT = config.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
