@@ -21,7 +21,7 @@ describe("blog API", () => {
       .get("/api/blogs")
       .expect(200)
       .expect("Content-Type", /application\/json/);
-    //based on the blogs added from the test_hleper.js file
+
     expect(response.body).toHaveLength(3);
   });
 
@@ -32,9 +32,9 @@ describe("blog API", () => {
 
   test("a valid blog can be added", async () => {
     const newBlog = {
-      title: "Blog post 7",
-      author: "Author 7",
-      url: "http://example.com/7",
+      title: "Blog post 6",
+      author: "Author 6",
+      url: "http://example.com/6",
       likes: 6,
     };
 
@@ -48,10 +48,27 @@ describe("blog API", () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
 
     const titles = blogsAtEnd.map((blog) => blog.title);
-    expect(titles).toContain("Blog post 7");
+    expect(titles).toContain("Blog post 6");
 
     const authors = blogsAtEnd.map((blog) => blog.author);
-    expect(authors).toContain("Author 7");
+    expect(authors).toContain("Author 6");
+  });
+
+  // Add the test for the default value of likes, should default to 0
+  test("missing likes property defaults to 0", async () => {
+    const newBlog = {
+      title: "Blog with missing likes",
+      author: "Author with missing likes",
+      url: "http://example.com/missing-likes",
+    };
+
+    const response = await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body.likes).toBe(0);
   });
 });
 
