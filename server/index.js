@@ -1,11 +1,11 @@
-require("dotenv").config({ path: "../.env" });
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Blog = require("./models/blog");
+const config = require("./utils/config");
 
-const mongoUrl = process.env.MONGODB_URI;
+const mongoUrl = config.MONGODB_URI;
 
 //middleware
 app.use(cors());
@@ -27,7 +27,7 @@ app.get("/api/blogs", (request, response) => {
   });
 });
 
-//post a  new blog to the database
+//post a new blog to the database
 app.post("/api/blogs", (request, response) => {
   const blog = new Blog(request.body);
   blog.save().then((result) => {
@@ -35,7 +35,7 @@ app.post("/api/blogs", (request, response) => {
   });
 });
 
-const PORT = process.env.PORT || 3003;
+const PORT = config.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
