@@ -52,6 +52,27 @@ app.delete("/api/blogs/:id", async (request, response) => {
   await Blog.findByIdAndDelete(id);
   response.status(204).end();
 });
+
+//route for updating a blog post
+app.put("/api/blogs/:id", async (request, response) => {
+  const { id } = request.params;
+  const blogData = request.body;
+
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(id, blogData, {
+      new: true,
+    });
+    if (updatedBlog) {
+      response.json(updatedBlog);
+    } else {
+      response.status(404).end();
+    }
+  } catch (error) {
+    console.error(error);
+    response.status(400).send({ error: "malformed id" });
+  }
+});
+
 const PORT = config.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
