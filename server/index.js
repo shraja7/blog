@@ -4,6 +4,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const Blog = require("./models/blog");
 const config = require("./utils/config");
+const bcrypt = require("bcrypt");
+const User = require("./models/user");
 
 const mongoUrl = config.MONGODB_URI;
 
@@ -71,6 +73,56 @@ app.put("/api/blogs/:id", async (request, response) => {
     console.error(error);
     response.status(400).send({ error: "malformed id" });
   }
+});
+
+//----------------------------------------------------------------
+//ROUTE FOR ADDING A USER TO THE DATABASE
+//----------------------------------------------------------------
+// create a new user
+app.post("/api/users", async (request, response) => {
+  const body = request.body;
+
+  if (!body.username || !body.password) {
+    return response.status(400).json({ error: "username or password missing" });
+  }
+
+  if (body.username.length < 3 || body.password.length < 3) {
+    return response
+      .status(400)
+      .json({ error: "username or password too short" });
+  }
+
+  const existingUser = await User.findOne({ username: body.username });
+  if (existingUser) {
+    return response.status(400).json({ error: "username must be unique" });
+  }
+
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(body.password, saltRounds);
+
+  const user = new User({
+    username: body.username,
+    name: body.name,
+    passwordHash,
+  });
+
+  try {
+    const savedUser = await user.save();
+    response.json(savedUser);
+  } catch (error) {
+    response.status(400).json({ error: error.message });
+  }
+});
+
+//route for getting all users
+// get all users
+app.get("/api/users", async (request, response) => {
+  const users = await User.find({}).populate("blogs", {
+    title: 1,
+    author: 1,
+    url: 1,
+  });
+  response.json(users);
 });
 
 const PORT = config.PORT || 3003;
