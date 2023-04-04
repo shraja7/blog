@@ -29,23 +29,39 @@ app.get("/api/blogs", (request, response) => {
   });
 });
 
-//post a new blog to the database
+// create a new blog post
+app.post("/api/blogs", async (request, response) => {
+  const body = request.body;
 
-app.post("/api/blogs", (request, response) => {
-  const blogData = request.body;
-
-  if (!blogData.title || !blogData.url) {
+  if (!body.title || !body.url) {
     return response.status(400).json({ error: "title or url missing" });
   }
 
-  if (blogData.likes === undefined) {
-    blogData.likes = 0;
+  const user = await User.findOne({});
+  if (!user) {
+    return response.status(400).json({ error: "no users in database" });
   }
 
-  const blog = new Blog(blogData);
-  blog.save().then((result) => {
-    response.status(201).json(result);
+  const blog = new Blog({
+    title: body.title,
+    author: body.author || "",
+    url: body.url,
+    likes: body.likes || 0,
+    user: user._id,
   });
+
+  try {
+    const savedBlog = await blog.save();
+    await user.blogs.push(savedBlog._id);
+    await user.save();
+    const populatedBlog = await Blog.findById(savedBlog._id).populate("user", {
+      username: 1,
+      name: 1,
+    });
+    response.status(201).json(populatedBlog);
+  } catch (error) {
+    response.status(400).json({ error: error.message });
+  }
 });
 
 // delete a blog post
