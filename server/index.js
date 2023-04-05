@@ -30,9 +30,25 @@ mongoose
 // get all blogs
 app.get("/api/blogs", async (request, response) => {
   const blogs = await Blog.find({})
-    .populate("user", { username: 1, name: 1 })
+    .populate("user", {
+      username: 1,
+      name: 1,
+      id: 1,
+    })
     .select("-__v");
-  response.json(blogs);
+
+  response.json(
+    blogs.map((blog) => {
+      return {
+        id: blog.id,
+        title: blog.title,
+        author: blog.author,
+        url: blog.url,
+        likes: blog.likes,
+        user: blog.user,
+      };
+    })
+  );
 });
 
 // create a new blog post
@@ -43,18 +59,12 @@ app.post("/api/blogs", authenticateToken, async (request, response) => {
     return response.status(400).json({ error: "title or url missing" });
   }
 
-  const user = request.userId;
-
-  if (!user) {
-    return response.status(400).json({ error: "no users in database" });
-  }
-
   const blog = new Blog({
     title: body.title,
     author: body.author || "",
     url: body.url,
     likes: body.likes || 0,
-    user: user._id,
+    user: request.userId,
   });
 
   try {
