@@ -9,9 +9,12 @@ const MONGODB_URI =
     : process.env.MONGODB_URI;
 const PORT = process.env.PORT; // http port
 
-console.log("MONGODB_URI from config.js: ", MONGODB_URI);
+const SECRET_KEY = process.env.SECRET_KEY;
+
+// console.log("MONGODB_URI from config.js: ", MONGODB_URI);
 
 module.exports = {
   MONGODB_URI,
   PORT,
+  SECRET_KEY,
 };
