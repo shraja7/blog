@@ -28,12 +28,10 @@ mongoose
   });
 
 // get all blogs
-app.get("/api/blogs", authenticateToken, async (request, response) => {
-  const blogs = await Blog.find({}).populate("user", {
-    username: 1,
-    name: 1,
-    id: 1,
-  });
+app.get("/api/blogs", async (request, response) => {
+  const blogs = await Blog.find({})
+    .populate("user", { username: 1, name: 1 })
+    .select("-__v");
   response.json(blogs);
 });
 
