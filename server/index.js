@@ -89,9 +89,22 @@ app.post("/api/blogs", authenticateToken, async (request, response) => {
 });
 
 // delete a blog post
-app.delete("/api/blogs/:id", async (request, response) => {
-  const id = request.params.id;
-  await Blog.findByIdAndDelete(id);
+app.delete("/api/blogs/:id", authenticateToken, async (request, response) => {
+  const blogId = request.params.id;
+  const userId = request.userId;
+
+  const blog = await Blog.findById(blogId);
+
+  if (!blog) {
+    return response.status(404).json({ error: "blog not found" });
+  }
+
+  if (blog.user.toString() !== userId) {
+    return response.status(401).json({ error: "unauthorized user" });
+  }
+
+  await Blog.findByIdAndRemove(blogId);
+
   response.status(204).end();
 });
 
