@@ -38,14 +38,15 @@ app.get("/api/blogs", authenticateToken, async (request, response) => {
 });
 
 // create a new blog post
-app.post("/api/blogs", async (request, response) => {
+app.post("/api/blogs", authenticateToken, async (request, response) => {
   const body = request.body;
 
   if (!body.title || !body.url) {
     return response.status(400).json({ error: "title or url missing" });
   }
 
-  const user = await User.findOne({});
+  const user = request.userId;
+
   if (!user) {
     return response.status(400).json({ error: "no users in database" });
   }
@@ -60,8 +61,15 @@ app.post("/api/blogs", async (request, response) => {
 
   try {
     const savedBlog = await blog.save();
-    await user.blogs.push(savedBlog._id);
-    await user.save();
+    console.log("savedBlog:", savedBlog);
+
+    const user = await User.findById(request.userId);
+    console.log("user:", user);
+
+    user.blogs.push(savedBlog._id);
+    const savedUser = await user.save();
+    console.log("savedUser:", savedUser);
+
     const populatedBlog = await Blog.findById(savedBlog._id).populate("user", {
       username: 1,
       name: 1,
